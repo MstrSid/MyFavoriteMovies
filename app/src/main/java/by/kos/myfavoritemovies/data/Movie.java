@@ -7,6 +7,7 @@ public class Movie {
     private String originalTitle;
     private String overview;
     private String posterPath;
+    private String bigPosterPath;
     private String backdropPath;
     private double voteAverage;
     private String releaseDate;
@@ -17,6 +18,7 @@ public class Movie {
                  String originalTitle,
                  String overview,
                  String posterPath,
+                 String bigPosterPath,
                  String backdropPath,
                  double voteAverage,
                  String releaseDate) {
@@ -26,6 +28,7 @@ public class Movie {
         this.originalTitle = originalTitle;
         this.overview = overview;
         this.posterPath = posterPath;
+        this.bigPosterPath = bigPosterPath;
         this.backdropPath = backdropPath;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
@@ -33,6 +36,14 @@ public class Movie {
 
     public int getId() {
         return id;
+    }
+
+    public String getBigPosterPath() {
+        return bigPosterPath;
+    }
+
+    public void setBigPosterPath(String bigPosterPath) {
+        this.bigPosterPath = bigPosterPath;
     }
 
     public void setId(int id) {
