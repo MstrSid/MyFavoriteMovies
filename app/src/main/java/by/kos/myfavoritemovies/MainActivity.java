@@ -1,6 +1,9 @@
 package by.kos.myfavoritemovies;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.annotation.SuppressLint;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import by.kos.myfavoritemovies.data.Movie;
 import by.kos.myfavoritemovies.databinding.ActivityMainBinding;
@@ -24,6 +28,7 @@ import by.kos.myfavoritemovies.utils.NetworkUtils;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MovieAdapter movieAdapter;
+    private MainViewModel movieViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        movieViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         movieAdapter = new MovieAdapter();
         movieAdapter.setOnPosterClickListener(new MovieAdapter.OnPosterClickListener() {
             @Override
@@ -47,34 +53,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         binding.rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
-        sort(NetworkUtils.POPULARITY);
         binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
         binding.rvMovies.setAdapter(movieAdapter);
-
+        binding.switchCategory.setChecked(true);
         binding.switchCategory.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int sortCriteria;
-                if (isChecked) {
-                    binding.tvTopRated.setTextColor(getResources().getColor(R.color.gold));
-                    binding.tvPopularity.setTextColor(getResources().getColor(R.color.primaryTextColor));
-                    sortCriteria = NetworkUtils.TOP_RATED;
-                } else {
-                    sortCriteria = NetworkUtils.POPULARITY;
-                    binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
-                    binding.tvTopRated.setTextColor(getResources().getColor(R.color.primaryTextColor));
-                }
-                sort(sortCriteria);
+                setMethodOfSort(isChecked);
             }
         });
+        binding.switchCategory.setChecked(false);
 
         binding.tvPopularity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sort(NetworkUtils.POPULARITY);
+                setMethodOfSort(false);
                 binding.switchCategory.setChecked(false);
-                binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
-                binding.tvTopRated.setTextColor(getResources().getColor(R.color.primaryTextColor));
             }
         });
 
@@ -82,18 +76,44 @@ public class MainActivity extends AppCompatActivity {
         binding.tvTopRated.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sort(NetworkUtils.TOP_RATED);
+                setMethodOfSort(true);
                 binding.switchCategory.setChecked(true);
-                binding.tvTopRated.setTextColor(getResources().getColor(R.color.gold));
-                binding.tvPopularity.setTextColor(getResources().getColor(R.color.primaryTextColor));
+            }
+        });
+
+        LiveData<List<Movie>> moviesFromLiveData = movieViewModel.getMovies();
+        moviesFromLiveData.observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(List<Movie> movies) {
+                movieAdapter.setMovies(movies);
             }
         });
 
     }
 
-    private void sort(int sortCriteria) {
+    private void setMethodOfSort(boolean isTopRated){
+        int sortCriteria;
+        if (isTopRated) {
+            binding.tvTopRated.setTextColor(getResources().getColor(R.color.gold));
+            binding.tvPopularity.setTextColor(getResources().getColor(R.color.primaryTextColor));
+            sortCriteria = NetworkUtils.TOP_RATED;
+        } else {
+            sortCriteria = NetworkUtils.POPULARITY;
+            binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
+            binding.tvTopRated.setTextColor(getResources().getColor(R.color.primaryTextColor));
+        }
+        downloadData(sortCriteria, 1);
+
+    }
+
+    private void downloadData(int sortCriteria, int page) {
         JSONObject jsonObject = NetworkUtils.getJSONFromNetwork(sortCriteria, 1);
         ArrayList<Movie> movies = JSONUtils.getMoviesFromJSON(jsonObject);
-        movieAdapter.setMovies(movies);
+        if (movies != null && !movies.isEmpty()) {
+            movieViewModel.deleteAllMovies();
+            for (Movie movie : movies) {
+                movieViewModel.insertMovie(movie);
+            }
+        }
     }
 }
