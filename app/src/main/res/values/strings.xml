@@ -3,4 +3,11 @@
     <string name="small_poster_for_movie">small poster for movie</string>
     <string name="popular">POPULAR</string>
     <string name="top_rated">TOP RATED</string>
+    <string name="title">Title:</string>
+    <string name="original_title">Original title:</string>
+    <string name="rating">Rating:</string>
+    <string name="release_date">Release date:</string>
+    <string name="description">Description:</string>
+    <string name="big_poster_image">big poster image</string>
+    <string name="add_or_remove_to_favorites">add or remove to favorites</string>
 </resources>

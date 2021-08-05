@@ -41,15 +41,16 @@ public class MainActivity extends AppCompatActivity {
         movieAdapter.setOnPosterClickListener(new MovieAdapter.OnPosterClickListener() {
             @Override
             public void onPosterClick(int position) {
-                //Intent openDetails = new Intent(MainActivity.this, DetailActivity.class);
-                //startActivity(openDetails);
-                Toast.makeText(MainActivity.this, position + "", Toast.LENGTH_SHORT).show();
+                Intent openDetailsIntent = new Intent(MainActivity.this, DetailActivity.class);
+                Movie movie = movieAdapter.getMovies().get(position);
+                openDetailsIntent.putExtra("id", movie.getId());
+                startActivity(openDetailsIntent);
             }
         });
         movieAdapter.setOnGetEndListener(new MovieAdapter.OnGetEndListener() {
             @Override
             public void onGetEnd() {
-                Toast.makeText(MainActivity.this, "End list", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "End list", Toast.LENGTH_SHORT).show();
             }
         });
         binding.rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
