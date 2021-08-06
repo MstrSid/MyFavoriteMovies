@@ -21,7 +21,7 @@ import java.util.List;
 import by.kos.myfavoritemovies.data.FavoriteMovie;
 import by.kos.myfavoritemovies.data.Movie;
 import by.kos.myfavoritemovies.databinding.ActivityFavoriteBinding;
-import by.kos.myfavoritemovies.utils.MovieAdapter;
+import by.kos.myfavoritemovies.adapters.MovieAdapter;
 
 public class FavoriteActivity extends AppCompatActivity {
     private ActivityFavoriteBinding binding;

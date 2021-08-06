@@ -10,13 +10,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -26,7 +24,7 @@ import java.util.List;
 import by.kos.myfavoritemovies.data.Movie;
 import by.kos.myfavoritemovies.databinding.ActivityMainBinding;
 import by.kos.myfavoritemovies.utils.JSONUtils;
-import by.kos.myfavoritemovies.utils.MovieAdapter;
+import by.kos.myfavoritemovies.adapters.MovieAdapter;
 import by.kos.myfavoritemovies.utils.NetworkUtils;
 
 public class MainActivity extends AppCompatActivity {

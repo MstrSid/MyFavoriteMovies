@@ -7,9 +7,22 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import by.kos.myfavoritemovies.data.Movie;
+import by.kos.myfavoritemovies.data.Review;
+import by.kos.myfavoritemovies.data.Trailer;
 
 public class JSONUtils {
     private static final String KEY_RESULTS = "results";
+
+    //for overviews
+    private static final String KEY_AUTHOR = "author";
+    private static final String KEY_CONTENT = "content";
+
+    //for trailers
+    private static final String KEY_OF_TRAILER = "key";
+    private static final String KEY_NAME = "name";
+    private static final String BASE_YOUTUBE_URL = "https://www.youtube.com/watch?v=";
+
+    //for all info about movies
     private static final String KEY_ID = "id";
     private static final String KEY_VOTE_COUNT = "vote_count";
     private static final String KEY_TITLE = "title";
@@ -23,6 +36,46 @@ public class JSONUtils {
     public static final String SMALL_POSTER_SIZE = "w300";
     public static final String BIG_POSTER_SIZE = "w780";
     public static final String BACKDROP_SIZE = "w780";
+
+    public static ArrayList<Review> getReviewsFromJSON(JSONObject jsonObject){
+        ArrayList<Review> result = new ArrayList<>();
+        if (jsonObject == null) {
+            return result;
+        }
+        try {
+            JSONArray jsonArray = jsonObject.getJSONArray(KEY_RESULTS);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject objectReview = jsonArray.getJSONObject(i);
+                String author = objectReview.getString(KEY_AUTHOR);
+                String content = objectReview.getString(KEY_CONTENT);
+                Review review = new Review(author, content);
+                result.add(review);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static ArrayList<Trailer> getTrailersFromJSON(JSONObject jsonObject){
+        ArrayList<Trailer> result = new ArrayList<>();
+        if (jsonObject == null) {
+            return result;
+        }
+        try {
+            JSONArray jsonArray = jsonObject.getJSONArray(KEY_RESULTS);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject objectTrailers = jsonArray.getJSONObject(i);
+                String key = BASE_YOUTUBE_URL+objectTrailers.getString(KEY_OF_TRAILER);
+                String name = objectTrailers.getString(KEY_NAME);
+                Trailer trailer = new Trailer(key, name);
+                result.add(trailer);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
     public static ArrayList<Movie> getMoviesFromJSON(JSONObject jsonObject) {
         ArrayList<Movie> result = new ArrayList<>();

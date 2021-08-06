@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutionException;
 
 public class NetworkUtils {
     private static final String BASE_URL = "https://api.themoviedb.org/3/discover/movie";
+    private static final String BASE_TRAILERS_URL = "https://api.themoviedb.org/3/movie/%s/videos";
+    private static final String BASE_REVIEWS_URL = "https://api.themoviedb.org/3/movie/%s/reviews";
     private static final String PARAMS_API_KEY = "api_key";
     private static final String PARAMS_LANGUAGE = "language";
     private static final String PARAMS_SORT_BY = "sort_by";
@@ -29,6 +31,32 @@ public class NetworkUtils {
 
     public static final int POPULARITY = 0;
     public static final int TOP_RATED = 1;
+
+    private static URL buildUrlToTrailers(int id){
+        Uri uri = Uri.parse(String.format(BASE_TRAILERS_URL, id)).buildUpon()
+                .appendQueryParameter(PARAMS_API_KEY, API_KEY)
+                .appendQueryParameter(PARAMS_LANGUAGE, LANGUAGE_VALUE)
+                .build();
+        try {
+            return new URL(uri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static URL buildUrlToReviews(int id){
+        Uri uri = Uri.parse(String.format(BASE_REVIEWS_URL, id)).buildUpon()
+                .appendQueryParameter(PARAMS_API_KEY, API_KEY)
+                /*.appendQueryParameter(PARAMS_LANGUAGE, LANGUAGE_VALUE)*/
+                .build();
+        try {
+            return new URL(uri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private static URL buildUrl(int sortBy, int page) {
         String sortMethod;
@@ -56,6 +84,27 @@ public class NetworkUtils {
     public static JSONObject getJSONFromNetwork(int sortBy, int page){
         JSONObject result = null;
         URL url = buildUrl(sortBy, page);
+        try {
+            result = new JSONLoadTask().execute(url).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static JSONObject getJSONForTrailers(int id){
+        JSONObject result = null;
+        URL url = buildUrlToTrailers(id);
+        try {
+            result = new JSONLoadTask().execute(url).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    public static JSONObject getJSONForReviews(int id){
+        JSONObject result = null;
+        URL url = buildUrlToReviews(id);
         try {
             result = new JSONLoadTask().execute(url).get();
         } catch (ExecutionException | InterruptedException e) {
