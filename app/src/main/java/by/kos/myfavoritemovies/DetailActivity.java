@@ -1,11 +1,15 @@
 package by.kos.myfavoritemovies;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -22,6 +26,30 @@ public class DetailActivity extends AppCompatActivity {
     private MainViewModel viewModel;
     private Movie movie;
     private FavoriteMovie favoriteMovie;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id){
+            case R.id.item_main:
+                Intent openMainIntent = new Intent(this, MainActivity.class);
+                startActivity(openMainIntent);
+                break;
+            case R.id.item_favorite:
+                Intent openFavoriteIntent = new Intent(this, FavoriteActivity.class);
+                startActivity(openFavoriteIntent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @SuppressLint("SetTextI18n")
     @Override
