@@ -5,7 +5,8 @@ import androidx.room.Ignore;
 
 @Entity(tableName = "favorite_movies")
 public class FavoriteMovie extends Movie {
-    public FavoriteMovie(int id,
+    public FavoriteMovie(int uniqueId,
+                         int id,
                          int voteCount,
                          String title,
                          String originalTitle,
@@ -15,7 +16,8 @@ public class FavoriteMovie extends Movie {
                          String backdropPath,
                          double voteAverage,
                          String releaseDate) {
-        super(id,
+        super(uniqueId,
+                id,
                 voteCount,
                 title,
                 originalTitle,
@@ -28,8 +30,9 @@ public class FavoriteMovie extends Movie {
     }
 
     @Ignore
-    public FavoriteMovie(Movie movie){
-        super(movie.getId(),
+    public FavoriteMovie(Movie movie) {
+        super(movie.getUniqueId(),
+                movie.getId(),
                 movie.getVoteCount(),
                 movie.getTitle(),
                 movie.getOriginalTitle(),

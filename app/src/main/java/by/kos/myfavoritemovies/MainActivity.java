@@ -1,15 +1,19 @@
 package by.kos.myfavoritemovies;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +22,7 @@ import android.widget.CompoundButton;
 
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +32,16 @@ import by.kos.myfavoritemovies.utils.JSONUtils;
 import by.kos.myfavoritemovies.adapters.MovieAdapter;
 import by.kos.myfavoritemovies.utils.NetworkUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<JSONObject> {
     private ActivityMainBinding binding;
     private MovieAdapter movieAdapter;
     private MainViewModel movieViewModel;
+    private final static int LOADER_ID = 1;
+    private LoaderManager loaderManager;
+    private static int page = 1;
+    private static boolean isLoading = false;
+    private static int sortCriteria;
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -45,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.item_main:
                 Intent openMainIntent = new Intent(this, MainActivity.class);
                 startActivity(openMainIntent);
@@ -58,12 +69,20 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private int getGolumnCount() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = (int) (displayMetrics.widthPixels / displayMetrics.density);
+        return width / 185 > 2 ? width / 185 : 2;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        loaderManager = LoaderManager.getInstance(this);
         movieViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         movieAdapter = new MovieAdapter();
         movieAdapter.setOnPosterClickListener(new MovieAdapter.OnPosterClickListener() {
@@ -78,16 +97,19 @@ public class MainActivity extends AppCompatActivity {
         movieAdapter.setOnGetEndListener(new MovieAdapter.OnGetEndListener() {
             @Override
             public void onGetEnd() {
-                //Toast.makeText(MainActivity.this, "End list", Toast.LENGTH_SHORT).show();
+                if (!isLoading) {
+                    downloadData(sortCriteria, page);
+                }
             }
         });
-        binding.rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
+        binding.rvMovies.setLayoutManager(new GridLayoutManager(this, getGolumnCount()));
         binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
         binding.rvMovies.setAdapter(movieAdapter);
         binding.switchCategory.setChecked(true);
         binding.switchCategory.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                page = 1;
                 setMethodOfSort(isChecked);
             }
         });
@@ -114,14 +136,15 @@ public class MainActivity extends AppCompatActivity {
         moviesFromLiveData.observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(List<Movie> movies) {
-                movieAdapter.setMovies(movies);
+                if (page == 1) {
+                    movieAdapter.setMovies(movies);
+                }
             }
         });
 
     }
 
-    private void setMethodOfSort(boolean isTopRated){
-        int sortCriteria;
+    private void setMethodOfSort(boolean isTopRated) {
         if (isTopRated) {
             binding.tvTopRated.setTextColor(getResources().getColor(R.color.gold));
             binding.tvPopularity.setTextColor(getResources().getColor(R.color.primaryTextColor));
@@ -131,18 +154,52 @@ public class MainActivity extends AppCompatActivity {
             binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
             binding.tvTopRated.setTextColor(getResources().getColor(R.color.primaryTextColor));
         }
-        downloadData(sortCriteria, 1);
+        downloadData(sortCriteria, page);
 
     }
 
     private void downloadData(int sortCriteria, int page) {
-        JSONObject jsonObject = NetworkUtils.getJSONFromNetwork(sortCriteria, 1);
-        ArrayList<Movie> movies = JSONUtils.getMoviesFromJSON(jsonObject);
+        URL url = NetworkUtils.buildUrl(sortCriteria, page);
+        Bundle bundle = new Bundle();
+        bundle.putString("url", url.toString());
+        loaderManager.restartLoader(LOADER_ID, bundle, this);
+    }
+
+    @NonNull
+    @Override
+    public Loader<JSONObject> onCreateLoader(int id, @Nullable Bundle args) {
+        NetworkUtils.JSONLoader jsonLoader = new NetworkUtils.JSONLoader(this, args);
+        jsonLoader.setOnStartLoadingListener(new NetworkUtils.JSONLoader.OnStartLoadingListener() {
+            @Override
+            public void onStartLoading() {
+                binding.pbLoading.setVisibility(View.VISIBLE);
+                isLoading = true;
+            }
+        });
+        return jsonLoader;
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<JSONObject> loader, JSONObject data) {
+        ArrayList<Movie> movies = JSONUtils.getMoviesFromJSON(data);
         if (movies != null && !movies.isEmpty()) {
-            movieViewModel.deleteAllMovies();
+            if (page == 1) {
+                movieViewModel.deleteAllMovies();
+                movieAdapter.clear();
+            }
             for (Movie movie : movies) {
                 movieViewModel.insertMovie(movie);
             }
+            movieAdapter.addMovies(movies);
+            page++;
         }
+        isLoading = false;
+        binding.pbLoading.setVisibility(View.INVISIBLE);
+        loaderManager.destroyLoader(LOADER_ID);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<JSONObject> loader) {
+
     }
 }
