@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import by.kos.myfavoritemovies.data.Movie;
 import by.kos.myfavoritemovies.databinding.ActivityMainBinding;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static int page = 1;
     private static boolean isLoading = false;
     private static int sortCriteria;
+    private static String lang;
 
 
     @Override
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
-    private int getGolumnCount() {
+    private int getColumnCount() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = (int) (displayMetrics.widthPixels / displayMetrics.density);
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         loaderManager = LoaderManager.getInstance(this);
         movieViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         movieAdapter = new MovieAdapter();
+        lang = Locale.getDefault().getLanguage();
         movieAdapter.setOnPosterClickListener(new MovieAdapter.OnPosterClickListener() {
             @Override
             public void onPosterClick(int position) {
@@ -102,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
             }
         });
-        binding.rvMovies.setLayoutManager(new GridLayoutManager(this, getGolumnCount()));
+        binding.rvMovies.setLayoutManager(new GridLayoutManager(this, getColumnCount()));
         binding.tvPopularity.setTextColor(getResources().getColor(R.color.gold));
         binding.rvMovies.setAdapter(movieAdapter);
         binding.switchCategory.setChecked(true);
@@ -159,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void downloadData(int sortCriteria, int page) {
-        URL url = NetworkUtils.buildUrl(sortCriteria, page);
+        URL url = NetworkUtils.buildUrl(sortCriteria, page, lang);
         Bundle bundle = new Bundle();
         bundle.putString("url", url.toString());
         loaderManager.restartLoader(LOADER_ID, bundle, this);

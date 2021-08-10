@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Favorite Movies</string>
+    <string name="small_poster_for_movie">мини постер для фильма</string>
+    <string name="popular">ПОПУЛЯРНЫЕ</string>
+    <string name="top_rated">РЕЙТИНГОВЫЕ</string>
+    <string name="title">Название:</string>
+    <string name="original_title">Оригинальное название:</string>
+    <string name="rating">Рейтинг:</string>
+    <string name="release_date">Дата выхода:</string>
+    <string name="description">Описание:</string>
+    <string name="big_poster_image">большой постер</string>
+    <string name="add_or_remove_to_favorites">добавить или удалить из избранного</string>
+    <string name="to_main_main_menu">Главная</string>
+    <string name="to_favorite_main_menu">Избранное</string>
+    <string name="play_on_youtube_trailer">Открыть трейлер на Youtube</string>
+</resources>

@@ -20,6 +20,7 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import by.kos.myfavoritemovies.adapters.ReviewAdapter;
 import by.kos.myfavoritemovies.adapters.TrailerAdapter;
@@ -42,6 +43,7 @@ public class DetailActivity extends AppCompatActivity {
     private ReviewAdapter reviewAdapter;
     private ArrayList<Review> reviews;
     private ArrayList<Trailer> trailers;
+    private static String lang;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,6 +76,7 @@ public class DetailActivity extends AppCompatActivity {
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        lang = Locale.getDefault().getLanguage();
 
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
@@ -87,7 +90,7 @@ public class DetailActivity extends AppCompatActivity {
 
         movie = viewModel.getMovieById(id);
 
-        Picasso.get().load(movie.getBigPosterPath()).into(binding.ivBigPoster);
+        Picasso.get().load(movie.getBigPosterPath()).placeholder(R.drawable.placeholderportrait700).into(binding.ivBigPoster);
 
         binding.tvTitle.setText(movie.getTitle());
         binding.tvOriginalTitle.setText(movie.getOriginalTitle());
@@ -102,11 +105,11 @@ public class DetailActivity extends AppCompatActivity {
         binding.rvTrailers.setLayoutManager(new LinearLayoutManager(this));
         binding.rvTrailers.setAdapter(trailerAdapter);
 
-        JSONObject jsonObjectReviews = NetworkUtils.getJSONForReviews(movie.getId());
+        JSONObject jsonObjectReviews = NetworkUtils.getJSONForReviews(movie.getId(), lang);
         reviews = JSONUtils.getReviewsFromJSON(jsonObjectReviews);
         reviewAdapter.setReviews(reviews);
 
-        JSONObject jsonObjectTrailers = NetworkUtils.getJSONForTrailers(movie.getId());
+        JSONObject jsonObjectTrailers = NetworkUtils.getJSONForTrailers(movie.getId(), lang);
         trailers = JSONUtils.getTrailersFromJSON(jsonObjectTrailers);
         trailerAdapter.setTrailers(trailers);
 
